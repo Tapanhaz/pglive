@@ -1,5 +1,5 @@
 import time
-from functools import lru_cache
+from functools import lru_cache, cache
 from typing import List, Tuple, Any, Dict, Union, Optional
 
 import numpy as np
@@ -79,26 +79,33 @@ class LiveHeatMap(pg.GraphicsObject, MixinLivePlot):
             str_size = p.fontMetrics().boundingRect(str(np.max(heatmap)))
             mapped_size = matrix.map(QtCore.QPointF(str_size.width(), str_size.height()))
             if str_size.width() > str_size.height():
-                scale = 1 / mapped_size.x()
+                side_size = mapped_size.x()
             else:
-                scale = 1 / mapped_size.y()
+                side_size = mapped_size.y()
+            scale = 1 / side_size
             p.scale(scale, -scale)
-            matrix = p.transform()
-            inv_matrix = matrix.inverted()[0]
             # Convert numbers to strings
             string_heatmap = heatmap.astype(str)
-            bounding = self.boundingRect().toAlignedRect()
+            # Y string offset
+            y_offset = (side_size - mapped_size.y()) / 2
             for ix, x in enumerate(x_data):
+                px = ix / scale
                 for iy, y in enumerate(y_data):
-                    # Draw numbers inside pixels
-                    p.drawText(inv_matrix.mapRect(QtCore.QRectF(ix, iy, 1, 1)),
-                               QtCore.Qt.AlignmentFlag.AlignCenter, string_heatmap[ix][iy])
+                    st, stz = self.get_static_text(string_heatmap[ix][iy])
+                    x_offset = (side_size - stz.width()) / 2
+                    py = (iy + 1) / -scale
+                    p.drawStaticText(int(px + x_offset), int(py + y_offset), st)
 
         p.end()
         self.prepareGeometryChange()
         self.informViewBoundsChanged()
         self.bounds = [None, None]
         self.sigPlotChanged.emit(self)
+
+    @cache
+    def get_static_text(self, text):
+        st = QtGui.QStaticText(text)
+        return st, st.size()
 
     def getData(self) -> Tuple[List[int], List[int]]:
         return self.x_data, self.y_data

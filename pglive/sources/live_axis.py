@@ -119,9 +119,6 @@ class LiveAxis(pg.AxisItem):
         if self.tick_angle == 0:
             for rect, flags, text in textSpecs:
                 p.drawText(rect, int(flags), text)
-            if self.label.isVisible():
-                min_height += self.label.boundingRect().height() * 0.8
-            self.fixedHeight = min_height + 7
         else:
             if self.orientation in ("bottom", "top"):
                 max_height = min_height

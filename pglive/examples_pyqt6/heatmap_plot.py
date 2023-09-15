@@ -19,7 +19,7 @@ Line plot is displayed in this example.
 global running
 # color map
 cmap = pg.colormap.get('CET-D1')
-plot = LiveHeatMap(colormap=cmap, grid_pen=pg.mkPen("red", width=1), draw_counts=False)
+plot = LiveHeatMap(colormap=cmap, grid_pen=pg.mkPen("red", width=1), draw_counts=True)
 
 resolution = 25
 left_labels = [f"Y{i}" for i in range(resolution)]
